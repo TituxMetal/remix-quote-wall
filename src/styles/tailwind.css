@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  * {
+    @apply focus:outline focus:outline-1 focus:outline-purple-100;
+  }
+
+  body {
+    @apply text-xl text-purple-100;
+  }
+
+  a {
+    @apply text-purple-200 hover:text-purple-100;
+  }
+
+  .gradient {
+    @apply bg-gradient-to-tl from-purple-500 via-purple-600 to-purple-700;
+  }
+}
