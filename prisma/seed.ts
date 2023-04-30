@@ -31,15 +31,15 @@ const getQuotes = () => [
 ]
 
 const seed = async () => {
-  const email = 'rachel@remix.run'
+  const email = 'titux@remix.run'
 
   // cleanup the existing database
   await prisma.user.deleteMany()
   await prisma.quote.deleteMany()
 
-  const hashedPassword = await bcrypt.hash('racheliscool', 10)
+  const hashedPassword = await bcrypt.hash('tituxiscool', 10)
 
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       email,
       password: {
@@ -50,7 +50,9 @@ const seed = async () => {
     }
   })
   await Promise.all(
-    getQuotes().map(quote => prisma.quote.create({ data: quote }))
+    getQuotes().map(quote =>
+      prisma.quote.create({ data: { userId: user.id, ...quote } })
+    )
   )
 
   console.log(`Database has been seeded. 🌱`)
