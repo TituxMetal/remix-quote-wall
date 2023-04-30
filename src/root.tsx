@@ -24,7 +24,7 @@ const App = () => {
         <Links />
       </head>
       <body className='relative bg-zinc-800 px-5'>
-        <main className='mx-auto mt-20 w-full max-w-screen-lg text-xl text-purple-200'>
+        <main className='mx-auto mt-20 w-full max-w-screen-lg'>
           <Outlet />
         </main>
         <ScrollRestoration />
