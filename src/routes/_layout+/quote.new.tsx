@@ -1,8 +1,36 @@
-import type { V2_MetaFunction } from '@remix-run/node'
+import type {
+  ActionArgs,
+  ActionFunction,
+  V2_MetaFunction
+} from '@remix-run/node'
+import { redirect } from '@remix-run/node'
+import { json } from '@remix-run/node'
+
+import { prisma } from '~/lib'
 
 export const meta: V2_MetaFunction = () => [
   { title: 'Add a Quote to the Wall' }
 ]
+
+export const action: ActionFunction = async ({ request }: ActionArgs) => {
+  const formData = await request.formData()
+  const { text, by } = Object.fromEntries(formData)
+
+  if (
+    typeof text !== 'string' ||
+    text.length === 0 ||
+    typeof by !== 'string' ||
+    by.length === 0
+  ) {
+    return json({ error: 'Form not submitted correctly.' }, { status: 400 })
+  }
+
+  const fields = { text, by }
+
+  await prisma.quote.create({ data: fields })
+
+  return redirect('/')
+}
 
 const inputClassName = `w-full rounded border-2 border-purple-100 bg-transparent px-2 py-1 text-xl text-purple-950`
 
