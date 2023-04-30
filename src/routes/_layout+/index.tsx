@@ -1,31 +1,21 @@
+import type { Quote } from '@prisma/client'
 import type { LoaderFunction, V2_MetaFunction } from '@remix-run/node'
 import { json } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
 
+import { prisma } from '~/lib'
+
 export const meta: V2_MetaFunction = () => [{ title: 'Remix Quote Wall' }]
 
-interface Quote {
-  quote: string
-  by: string
-}
+// interface Quote {
+//   text: string
+//   by: string
+// }
 
 export const loader: LoaderFunction = async (): Promise<Response> => {
-  return json({
-    quotes: [
-      {
-        quote: 'Light at the end of the tunnel, dey don cut am.',
-        by: 'Brain Jotter'
-      },
-      {
-        quote: 'Promised to stand by you, we don sit down.',
-        by: 'Brain Jotter'
-      },
-      {
-        quote: 'Polythecnic wey dey in Italy, Napoli.',
-        by: 'Comrade with wisdom and Understanding'
-      }
-    ] as Array<Quote>
-  })
+  const quotes = await prisma.quote.findMany()
+
+  return json({ quotes })
 }
 
 const IndexPage = () => {
@@ -55,13 +45,13 @@ const IndexPage = () => {
         </div>
       </nav>
       <section className='grid grid-cols-1 lg:grid-flow-row lg:grid-cols-3'>
-        {quotes.map(({ quote, by }: Quote, index: string) => (
+        {quotes.map(({ text, by }: Quote, index: string) => (
           <figure
             key={index}
             className='m-4 bg-purple-700 px-4 py-10 shadow-md shadow-purple-600'
           >
-            <blockquote cite='https://wisdomman.com' className='py-3'>
-              <p className='text-2xl text-gray-300'>{quote}</p>
+            <blockquote className='py-3'>
+              <p className='text-2xl text-gray-300'>{text}</p>
             </blockquote>
             <figcaption>
               <cite className='mb-4 text-right text-xl text-purple-100'>
