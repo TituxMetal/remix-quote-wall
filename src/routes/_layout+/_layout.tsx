@@ -1,6 +1,21 @@
-import { Link, Outlet } from '@remix-run/react'
+import type { LoaderArgs, LoaderFunction } from '@remix-run/node'
+import { json } from '@remix-run/node'
+import { Link, Outlet, useLoaderData } from '@remix-run/react'
+
+import { getUserFromDb } from '~/services'
+
+export const loader: LoaderFunction = async ({
+  request,
+  params
+}: LoaderArgs) => {
+  const user = await getUserFromDb(request)
+
+  return json(user)
+}
 
 const Layout = () => {
+  const user = useLoaderData()
+
   return (
     <>
       <nav className='gradient fixed left-0 top-0 w-full px-5'>
@@ -9,18 +24,27 @@ const Layout = () => {
             Quote Wall
           </Link>
           <ul className='flex flex-col items-center justify-between gap-x-4 font-bold md:flex-row'>
-            <li>
-              <Link to='/login'>Login</Link>
-            </li>
-            <li>
-              <Link to='/register'>Register</Link>
-            </li>
-            <li>
-              <Link to='/quote/new'>Add a Quote</Link>
-            </li>
-            <li>
-              <Link to='/logout'>Logout</Link>
-            </li>
+            {user ? (
+              <>
+                <li>
+                  <Link to='/quote/new'>Add a Quote</Link>
+                </li>
+                <li>
+                  <form action='/logout' method='post'>
+                    <button type='submit'>Logout</button>
+                  </form>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Link to='/login'>Login</Link>
+                </li>
+                <li>
+                  <Link to='/register'>Register</Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </nav>
