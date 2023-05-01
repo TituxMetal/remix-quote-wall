@@ -90,7 +90,7 @@ const inputClassName = `w-full rounded border-2 border-purple-100 bg-transparent
 
 const LoginPage = () => {
   const actionData = useActionData()
-  const [serarchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
 
   return (
     <div className='flex content-center items-center justify-center'>
@@ -102,7 +102,7 @@ const LoginPage = () => {
           <input
             type='hidden'
             name='redirectTo'
-            value={serarchParams.get('redirectTo') ?? undefined}
+            value={searchParams.get('redirectTo') ?? undefined}
           />
           <fieldset className='flex justify-center'>
             <legend className='sr-only'>Login or Register</legend>
