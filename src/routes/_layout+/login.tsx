@@ -4,11 +4,11 @@ import type {
   V2_MetaFunction
 } from '@remix-run/node'
 import { json } from '@remix-run/node'
-import { useActionData, useSearchParams } from '@remix-run/react'
+import { Link, useActionData, useSearchParams } from '@remix-run/react'
 
 import { createUserSession, login } from '~/services'
 
-export const meta: V2_MetaFunction = () => [{ title: 'Authenticate' }]
+export const meta: V2_MetaFunction = () => [{ title: 'Login to your account' }]
 
 const validateEmail = (email: unknown) => {
   if (typeof email !== 'string' || email.length < 3) {
@@ -47,11 +47,9 @@ const badRequest = (data: any) => json(data, { status: 400 })
 
 export const action: ActionFunction = async ({ request }: ActionArgs) => {
   const formData = await request.formData()
-  const { loginType, email, password, redirectTo } =
-    Object.fromEntries(formData)
+  const { email, password, redirectTo } = Object.fromEntries(formData)
 
   if (
-    typeof loginType !== 'string' ||
     typeof email !== 'string' ||
     typeof password !== 'string' ||
     typeof redirectTo !== 'string'
@@ -60,7 +58,7 @@ export const action: ActionFunction = async ({ request }: ActionArgs) => {
   }
 
   const validRedirectTo = validateUrl(redirectTo || '/')
-  const fields = { loginType, email, password }
+  const fields = { email, password }
   const fieldErrors = {
     email: validateEmail(email),
     password: validatePassword(password)
@@ -70,20 +68,13 @@ export const action: ActionFunction = async ({ request }: ActionArgs) => {
     return badRequest({ fieldErrors, fields })
   }
 
-  switch (loginType) {
-    case 'login': {
-      const user = await login({ email, password })
+  const user = await login({ email, password })
 
-      if (!user) {
-        return badRequest({ fields, formError: 'Invalid Credentials' })
-      }
-
-      return createUserSession(user.id, validRedirectTo)
-    }
-    default: {
-      return badRequest({ fields, formError: 'Login type invalid.' })
-    }
+  if (!user) {
+    return badRequest({ fields, formError: 'Invalid Credentials' })
   }
+
+  return createUserSession(user.id, validRedirectTo)
 }
 
 const inputClassName = `w-full rounded border-2 border-purple-100 bg-transparent px-2 py-1 text-xl text-purple-950`
@@ -96,39 +87,16 @@ const LoginPage = () => {
     <div className='flex content-center items-center justify-center'>
       <section className='gradient my-10 rounded-md px-5 py-6 font-bold md:w-2/3 lg:m-10 lg:w-1/2'>
         <h1 className='mb-6 text-center text-4xl font-bold text-purple-100'>
-          Authentication
+          Login to your account
         </h1>
-        <form noValidate method='post' className='flex flex-col gap-4'>
+        <form method='post' className='flex flex-col gap-4'>
           <input
             type='hidden'
             name='redirectTo'
             value={searchParams.get('redirectTo') ?? undefined}
           />
           <fieldset className='flex justify-center'>
-            <legend className='sr-only'>Login or Register</legend>
-            <label className='mx-2'>
-              <input
-                className='mx-2'
-                type='radio'
-                name='loginType'
-                value='login'
-                defaultChecked={
-                  !actionData?.fields?.loginType ||
-                  actionData?.fields?.loginType === 'login'
-                }
-              />
-              Login
-            </label>
-            <label className='mx-2'>
-              <input
-                className='mx-2'
-                type='radio'
-                name='loginType'
-                value='register'
-                defaultChecked={actionData?.fields?.loginType === 'register'}
-              />
-              Register
-            </label>
+            <Link to='/register'>Need an Account?</Link>
           </fieldset>
           <label className='text-xl leading-7 text-purple-100'>
             Email:
@@ -188,7 +156,7 @@ const LoginPage = () => {
             className='w-min rounded-lg border-2 border-purple-100 bg-purple-700 px-10 py-3 font-bold hover:scale-105'
             type='submit'
           >
-            Submit
+            Login
           </button>
         </form>
       </section>
