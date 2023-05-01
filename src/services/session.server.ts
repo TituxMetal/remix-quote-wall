@@ -95,6 +95,18 @@ export const login = async ({ email, password }: LoginForm) => {
 
 /**
  * @TODO Move this function in a auth service
+ */
+export const register = async ({ email, password }: LoginForm) => {
+  const passwordHash = await bcrypt.hash(password, 12)
+  const newUser = await prisma.user.create({
+    data: { email, password: { create: { hash: passwordHash } } }
+  })
+
+  return newUser
+}
+
+/**
+ * @TODO Move this function in a auth service
  * @TODO Replace request arg by userId
  * @TODO Remove userId const and the typeof check
  */
