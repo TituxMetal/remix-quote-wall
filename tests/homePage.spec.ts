@@ -19,6 +19,6 @@ test.describe('Home Page', () => {
 
     const addBtn = await page.getByRole('link', { name: /add a quote/i })
 
-    await expect(addBtn).toBeVisible()
+    await expect(addBtn).not.toBeVisible()
   })
 })
