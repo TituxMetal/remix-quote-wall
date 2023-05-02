@@ -5,10 +5,10 @@ import type {
 } from '@remix-run/node'
 import { redirect } from '@remix-run/node'
 
-import { logout } from '~/services'
+import { authService } from '~/services'
 
 export const action: ActionFunction = ({ request }: ActionArgs) => {
-  return logout(request)
+  return authService.logout(request)
 }
 
 export const loader: LoaderFunction = () => {

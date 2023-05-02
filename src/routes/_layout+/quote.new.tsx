@@ -9,14 +9,14 @@ import { redirect } from '@remix-run/node'
 import { json } from '@remix-run/node'
 
 import { prisma } from '~/lib'
-import { requireUserId } from '~/services'
+import { sessionService } from '~/services'
 
 export const meta: V2_MetaFunction = () => [
   { title: 'Add a Quote to the Wall' }
 ]
 
 export const action: ActionFunction = async ({ request }: ActionArgs) => {
-  const userId = await requireUserId(request, '/quote/new')
+  const userId = await sessionService.requireUserId(request, '/quote/new')
   const formData = await request.formData()
   const { text, by } = Object.fromEntries(formData)
 
@@ -37,7 +37,7 @@ export const action: ActionFunction = async ({ request }: ActionArgs) => {
 }
 
 export const loader: LoaderFunction = async ({ request }: LoaderArgs) => {
-  return await requireUserId(request, '/quote/new')
+  return await sessionService.requireUserId(request, '/quote/new')
 }
 
 const inputClassName = `w-full rounded border-2 border-purple-100 bg-transparent px-2 py-1 text-xl text-purple-950`
