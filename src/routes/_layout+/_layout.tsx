@@ -2,13 +2,10 @@ import type { LoaderArgs, LoaderFunction } from '@remix-run/node'
 import { json } from '@remix-run/node'
 import { Link, Outlet, useLoaderData } from '@remix-run/react'
 
-import { getUserFromDb } from '~/services'
+import { authService } from '~/services'
 
-export const loader: LoaderFunction = async ({
-  request,
-  params
-}: LoaderArgs) => {
-  const user = await getUserFromDb(request)
+export const loader: LoaderFunction = async ({ request }: LoaderArgs) => {
+  const user = await authService.getUser(request)
 
   return json(user)
 }

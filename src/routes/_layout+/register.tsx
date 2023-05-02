@@ -3,48 +3,18 @@ import type {
   ActionFunction,
   V2_MetaFunction
 } from '@remix-run/node'
-import { json } from '@remix-run/node'
 import { Link, useActionData, useSearchParams } from '@remix-run/react'
 
 import { prisma } from '~/lib'
-import { createUserSession, register } from '~/services'
+import { authService, sessionService } from '~/services'
+import {
+  badRequest,
+  validateEmail,
+  validatePassword,
+  validateUrl
+} from '~/utils'
 
 export const meta: V2_MetaFunction = () => [{ title: 'Create a new account' }]
-
-const validateEmail = (email: unknown) => {
-  if (typeof email !== 'string' || email.length < 3) {
-    return `Email must not be empty`
-  }
-
-  if (!email.includes('@')) {
-    return `Email must be a valid email.`
-  }
-
-  return false
-}
-const validatePassword = (password: unknown) => {
-  if (typeof password !== 'string' || password.length === 0) {
-    return `Password must not be empty.`
-  }
-
-  if (password.length < 6) {
-    return `Password must be at least 6 characters long.`
-  }
-
-  return false
-}
-
-const validateUrl = (url: string) => {
-  const urls = ['/', '/quote/new']
-
-  if (urls.includes(url)) {
-    return url
-  }
-
-  return '/'
-}
-
-const badRequest = (data: any) => json(data, { status: 400 })
 
 export const action: ActionFunction = async ({ request }: ActionArgs) => {
   const formData = await request.formData()
@@ -78,7 +48,7 @@ export const action: ActionFunction = async ({ request }: ActionArgs) => {
     })
   }
 
-  const user = await register({ email, password })
+  const user = await authService.register({ email, password })
 
   if (!user) {
     return badRequest({
@@ -87,7 +57,7 @@ export const action: ActionFunction = async ({ request }: ActionArgs) => {
     })
   }
 
-  return createUserSession(user.id, validRedirectTo)
+  return sessionService.createUserSession(user.id, validRedirectTo)
 }
 
 const inputClassName = `w-full rounded border-2 border-purple-100 bg-transparent px-2 py-1 text-xl text-purple-950`
