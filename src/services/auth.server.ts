@@ -1,76 +1,67 @@
-import type { Password, User } from '@prisma/client'
-import { redirect } from '@remix-run/node'
-import bcrypt from 'bcryptjs'
+import type { User } from '@prisma/client'
+import * as argon from 'argon2'
+import { Authenticator, AuthorizationError } from 'remix-auth'
+import { FormStrategy } from 'remix-auth-form'
+import invariant from 'tiny-invariant'
 
-import { prisma } from '~/lib'
+import { createUser, getUserByEmail, getUserWithPassword } from '~/models'
 
-import sessionService from './session.server'
+import { sessionStorage } from './session.server'
 
-type LoginForm = {
-  email: User['email']
-  password: Password['hash']
-}
+type AuthSession = Pick<User, 'id' | 'email'>
 
-const logout = async (request: Request) => {
-  const session = await sessionService.getUserSession(request)
+export const authenticator = new Authenticator<AuthSession>(sessionStorage, {
+  sessionKey: 'sessionKey',
+  sessionErrorKey: 'sessionErrorKey',
+  throwOnError: true
+})
 
-  return redirect('/login', {
-    headers: {
-      'Set-Cookie': await sessionService.storage.destroySession(session)
+authenticator.use(
+  new FormStrategy(async ({ form }) => {
+    const email = form.get('email')
+    const password = form.get('password')
+
+    invariant(typeof email === 'string')
+    invariant(typeof password === 'string')
+
+    const user = await getUserWithPassword(email)
+
+    if (!user) {
+      throw new AuthorizationError('Invalid credentials!')
     }
-  })
-}
 
-const login = async ({ email, password }: LoginForm) => {
-  const userWithPassword = await prisma.user.findUnique({
-    where: { email },
-    include: { password: true }
-  })
+    const userPassword = user.password?.hash || ''
+    const passwordMatches = await argon.verify(userPassword, password)
 
-  if (!userWithPassword || !userWithPassword.password) {
-    return null
-  }
+    if (!passwordMatches) {
+      throw new AuthorizationError('Invalid credentials!')
+    }
 
-  const passwordMatches = await bcrypt.compare(
-    password,
-    userWithPassword.password.hash
-  )
+    const { id } = user
 
-  if (!passwordMatches) {
-    return null
-  }
+    return { id, email }
+  }),
+  'login'
+)
 
-  const { password: _password, ...userWithoutPassword } = userWithPassword
+authenticator.use(
+  new FormStrategy(async ({ form }) => {
+    const email = form.get('email')
+    const password = form.get('password')
 
-  return userWithoutPassword
-}
+    invariant(typeof email === 'string')
+    invariant(typeof password === 'string')
 
-const register = async ({ email, password }: LoginForm) => {
-  const passwordHash = await bcrypt.hash(password, 12)
-  const newUser = await prisma.user.create({
-    data: { email, password: { create: { hash: passwordHash } } }
-  })
+    const exisingUser = await getUserByEmail(email)
 
-  return newUser
-}
+    if (exisingUser) {
+      throw new AuthorizationError('Email already taken.')
+    }
 
-const getUser = async (request: Request) => {
-  const userId = await sessionService.getUserIdSession(request)
+    const user = await createUser({ email, password })
+    const { id } = user
 
-  if (typeof userId !== 'string') {
-    return null
-  }
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, email: true }
-    })
-
-    return user
-  } catch {
-    throw logout(request)
-  }
-}
-
-export default { getUser, login, logout, register }
+    return { id, email }
+  }),
+  'register'
+)
