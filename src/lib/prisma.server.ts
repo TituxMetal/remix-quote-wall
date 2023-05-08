@@ -1,14 +1,29 @@
 import { PrismaClient } from '@prisma/client'
+import invariant from 'tiny-invariant'
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
+const getClient = () => {
+  const { DATABASE_URL } = process.env
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
+  invariant(
+    typeof DATABASE_URL === 'string',
+    'DATABASE_URL must be set in env vars'
+  )
+
+  const client = new PrismaClient({
     log:
       process.env.NODE_ENV === 'development'
         ? ['query', 'error', 'warn']
         : ['error']
   })
+
+  client.$connect()
+  console.log('prisma connected!')
+
+  return client
+}
+
+const globalForPrisma = global as unknown as { prisma: PrismaClient }
+
+export const prisma = globalForPrisma.prisma || getClient()
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
