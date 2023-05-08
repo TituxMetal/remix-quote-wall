@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
+import * as argon from 'argon2'
 
 const prisma = new PrismaClient()
 
@@ -37,7 +37,7 @@ const seed = async () => {
   await prisma.user.deleteMany()
   await prisma.quote.deleteMany()
 
-  const hashedPassword = await bcrypt.hash('tituxiscool', 10)
+  const hashedPassword = await argon.hash('tituxiscool')
 
   const user = await prisma.user.create({
     data: {
