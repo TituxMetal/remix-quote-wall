@@ -5,11 +5,10 @@ import type {
 } from '@remix-run/node'
 import { redirect } from '@remix-run/node'
 
-import { authService } from '~/services'
+import { authenticator } from '~/services'
 
-export const action: ActionFunction = ({ request }: ActionArgs) => {
-  return authService.logout(request)
-}
+export const action: ActionFunction = async ({ request }: ActionArgs) =>
+  authenticator.logout(request, { redirectTo: '/' })
 
 export const loader: LoaderFunction = () => {
   return redirect('/')
