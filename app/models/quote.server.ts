@@ -1,4 +1,4 @@
-import type { Quote } from '@prisma/client'
+import { type Quote } from '@prisma/client'
 
 import { prisma } from '~/lib'
 

@@ -1,3 +1,6 @@
+import clsx, { type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
 export class InvariantError extends Error {
   constructor(message: string) {
     super(message)
@@ -20,14 +23,9 @@ export class InvariantError extends Error {
  *
  * @throws {InvariantError} if condition is falsey
  */
-export function invariant(
-  condition: any,
-  message: string | (() => string)
-): asserts condition {
+export function invariant(condition: any, message: string | (() => string)): asserts condition {
   if (!condition) {
-    throw new InvariantError(
-      typeof message === 'function' ? message() : message
-    )
+    throw new InvariantError(typeof message === 'function' ? message() : message)
   }
 }
 
@@ -58,3 +56,5 @@ export function invariantResponse(
     })
   }
 }
+
+export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs))

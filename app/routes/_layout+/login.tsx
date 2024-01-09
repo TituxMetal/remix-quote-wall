@@ -1,9 +1,7 @@
-import type {
-  ActionArgs,
-  ActionFunction,
-  LoaderArgs,
-  LoaderFunction,
-  V2_MetaFunction
+import {
+  type ActionFunctionArgs,
+  type LoaderFunctionArgs,
+  type MetaFunction
 } from '@remix-run/node'
 import { Link } from '@remix-run/react'
 import { makeDomainFunction } from 'domain-functions'
@@ -14,9 +12,9 @@ import { RemixForm } from '~/components/form'
 import { AuthSchema } from '~/schemas'
 import { authenticator } from '~/services'
 
-export const meta: V2_MetaFunction = () => [{ title: 'Create a new account' }]
+export const meta: MetaFunction = () => [{ title: 'Login to your account' }]
 
-export const action: ActionFunction = async ({ request }: ActionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   await performMutation({
     request,
     schema: AuthSchema,
@@ -24,8 +22,8 @@ export const action: ActionFunction = async ({ request }: ActionArgs) => {
   })
 
   try {
-    return await authenticator.authenticate('register', request, {
-      successRedirect: '/'
+    return await authenticator.authenticate('login', request, {
+      successRedirect: '/quote/new'
     })
   } catch (error) {
     if (error instanceof AuthorizationError) {
@@ -36,20 +34,20 @@ export const action: ActionFunction = async ({ request }: ActionArgs) => {
   }
 }
 
-export const loader: LoaderFunction = async ({ request }: LoaderArgs) =>
+export const loader = async ({ request }: LoaderFunctionArgs) =>
   authenticator.isAuthenticated(request, { successRedirect: '/' })
 
-const RegisterPage = () => {
+const LoginPage = () => {
   return (
     <div className='flex content-center items-center justify-center'>
       <section className='gradient my-10 rounded-md px-5 py-6 font-bold md:w-2/3 lg:m-10 lg:w-1/2'>
         <h1 className='mb-6 text-center text-4xl font-bold text-purple-100'>
-          Create a new account
+          Login to your account
         </h1>
         <p className='flex justify-center'>
-          <Link to='/login'>Already have an account?</Link>
+          <Link to='/register'>Need an Account?</Link>
         </p>
-        <RemixForm schema={AuthSchema} buttonLabel='Register'>
+        <RemixForm schema={AuthSchema} buttonLabel='Login'>
           {({ Field, Button, Errors }) => (
             <>
               <Field name='email' />
@@ -64,4 +62,4 @@ const RegisterPage = () => {
   )
 }
 
-export default RegisterPage
+export default LoginPage

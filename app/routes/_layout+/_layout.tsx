@@ -1,13 +1,13 @@
-import type { LoaderArgs, LoaderFunction } from '@remix-run/node'
+import { type LoaderFunctionArgs } from '@remix-run/node'
 import { Link, Outlet, useLoaderData } from '@remix-run/react'
 
 import { authenticator } from '~/services'
 
-export const loader: LoaderFunction = async ({ request }: LoaderArgs) =>
+export const loader = async ({ request }: LoaderFunctionArgs) =>
   authenticator.isAuthenticated(request)
 
 const Layout = () => {
-  const user = useLoaderData()
+  const user = useLoaderData<typeof loader>()
 
   return (
     <>

@@ -1,11 +1,5 @@
-import {
-  Form as FrameworkForm,
-  useActionData,
-  useSubmit,
-  useNavigation
-} from '@remix-run/react'
-import type { FormProps, FormSchema } from 'remix-forms'
-import { createForm } from 'remix-forms'
+import { Form as FrameworkForm, useActionData, useNavigation, useSubmit } from '@remix-run/react'
+import { createForm, type FormProps, type FormSchema } from 'remix-forms'
 
 import { Button, FormError, Input, Textarea } from '~/components/elements'
 
@@ -16,9 +10,7 @@ const Form = createForm({
   useSubmit
 })
 
-export const RemixForm = <Schema extends FormSchema>(
-  props: FormProps<Schema>
-) => (
+export const RemixForm = <Schema extends FormSchema>(props: FormProps<Schema>) => (
   <Form<Schema>
     className='flex flex-col gap-4'
     errorComponent={FormError}
