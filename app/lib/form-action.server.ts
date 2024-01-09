@@ -1,4 +1,4 @@
-import { redirect, json } from '@remix-run/node'
+import { json, redirect } from '@remix-run/node'
 import { createFormAction } from 'remix-forms'
 
 const formAction = createFormAction({ redirect, json })

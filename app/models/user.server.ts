@@ -1,4 +1,4 @@
-import type { Password, User } from '@prisma/client'
+import { type Password, type User } from '@prisma/client'
 import * as argon from 'argon2'
 
 import { prisma } from '~/lib'
@@ -8,8 +8,7 @@ type CreateUserInput = {
   password: Password['hash']
 }
 
-export const getUserByEmail = async (email: string) =>
-  prisma.user.findUnique({ where: { email } })
+export const getUserByEmail = async (email: string) => prisma.user.findUnique({ where: { email } })
 
 export const getUserWithPassword = async (email: string) =>
   prisma.user.findUnique({
